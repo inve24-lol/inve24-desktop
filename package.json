@@ -1,0 +1,63 @@
+{
+  "name": "inve24-desktop",
+  "version": "0.0.1",
+  "description": "INVE24 Desktop",
+  "main": "main.js",
+  "author": "okonomiyakki",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "deploy:osx": "electron-builder --mac",
+    "deploy:win": "npm run deploy:win32 && npm run deploy:win64",
+    "deploy:win32": "electron-builder --win nsis:ia32",
+    "deploy:win64": "electron-builder --win nsis:x64"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "league-connect": "^6.0.0-rc13",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "productName": "INVE24",
+    "appId": "com.okonomiyakki.ex.inve24",
+    "asar": true,
+    "mac": {
+      "target": [
+        "default"
+      ]
+    },
+    "dmg": {
+      "title": "INVE24"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "language": 1042,
+      "shortcutName": "INVE24",
+      "artifactName": "INVE24 Installer ${version}.${ext}",
+      "uninstallDisplayName": "INVE24"
+    },
+    "directories": {
+      "buildResources": "./resources/installer/",
+      "output": "./dist/",
+      "app": "."
+    }
+  }
+}
