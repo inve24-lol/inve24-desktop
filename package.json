@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
     "league-connect": "^6.0.0-rc13",
     "socket.io-client": "^4.8.1"
   },
@@ -58,6 +59,9 @@
       "buildResources": "./resources/installer/",
       "output": "./dist/",
       "app": "."
-    }
+    },
+    "files": [
+      "!**/.env"
+    ]
   }
 }
