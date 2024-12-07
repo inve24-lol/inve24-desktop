@@ -62,20 +62,16 @@ class AppServerSocketService {
   }
 
   async joinAppServerRoom() {
-    try {
-      if (!this._appServerSocket) throw new Error('⚠ 연결된 서버가 없습니다.');
+    if (!this._appServerSocket)
+      this._webContents.send('log', { message: '⚠ 연결된 서버가 없습니다.', isError: true });
 
-      this._appServerSocket.emit('join-room', { roomId: this._puuid });
+    this._appServerSocket.emit('join-room', { roomId: this._puuid });
 
-      this._appServerSocket.on('join-room-reply-app', (body) => {
-        const { message } = body;
+    this._appServerSocket.on('join-room-reply-app', (body) => {
+      const { message } = body;
 
-        this._webContents.send('log', { message: `🟩 서버 방 참여 성공 (${message})` });
-      });
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+      this._webContents.send('log', { message: `🟩 서버 방 참여 성공 (${message})` });
+    });
   }
 
   async closeAppServerSocket() {
