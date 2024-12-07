@@ -36,9 +36,13 @@ class AppServerSocketService {
         this._webContents.send('log', { message: '🟩 서버 연결 성공' });
       });
 
-      appServerSocket.on('error-message', (error) => {
+      appServerSocket.on('handle-connection-error', (error) => {
         const { message } = error.response;
 
+        this._webContents.send('log', { message: `⚠ ${message}`, isError: true });
+      });
+
+      appServerSocket.on('session-conflict-error', (message) => {
         this._webContents.send('log', { message: `⚠ ${message}`, isError: true });
       });
 
@@ -81,6 +85,8 @@ class AppServerSocketService {
   async closeAppServerSocket() {
     try {
       if (!this._appServerSocket) throw new Error('⚠ 연결된 서버가 없습니다.');
+
+      this._appServerSocket.emit('disconnect-request', { socketEntryCode: this._puuid });
 
       this._appServerSocket.disconnect();
 
