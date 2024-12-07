@@ -2,7 +2,7 @@
   "name": "inve24-desktop",
   "version": "0.0.1",
   "description": "INVE24 Desktop",
-  "main": "main.js",
+  "main": "src/app.js",
   "author": "okonomiyakki",
   "license": "UNLICENSED",
   "private": true,
