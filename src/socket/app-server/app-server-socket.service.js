@@ -67,10 +67,14 @@ class AppServerSocketService {
 
     this._appServerSocket.emit('join-room', { roomId: this._puuid });
 
+    this._appServerSocket.off('join-room-reply-app');
+
     this._appServerSocket.on('join-room-reply-app', (body) => {
       const { message } = body;
 
-      this._webContents.send('log', { message: `🟩 서버 방 참여 성공 (${message})` });
+      this._webContents.send('log', {
+        message: `🟩 ${message} (화면에 발급된 QR코드를 찍어주세요.)`,
+      });
     });
   }
 
