@@ -23,6 +23,8 @@ class LolClientSocketService {
         if (code === 1006) {
           this._lolClientSocket = null;
 
+          if (this._webContents.isDestroyed()) return;
+
           this._webContents.send('log', { message: '🟥 롤 클라이언트를 찾을 수 없습니다.' });
         }
       });
@@ -44,6 +46,8 @@ class LolClientSocketService {
       this._lolClientSocket.on('close', (code) => {
         if (code === 1000) {
           this._lolClientSocket = null;
+
+          if (this._webContents.isDestroyed()) return;
 
           this._webContents.send('log', { message: '🟥 롤 클라이언트 연결 종료' });
         }

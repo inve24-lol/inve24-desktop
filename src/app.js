@@ -2,6 +2,8 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const AppModule = require('./app.module');
 
+let appModule;
+
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1100,
@@ -23,9 +25,13 @@ const createWindow = () => {
   });
 
   mainWindow.webContents.on('did-finish-load', async () => {
-    const appModule = new AppModule(mainWindow.webContents);
+    appModule = new AppModule(mainWindow.webContents);
     appModule.initialize();
   });
 };
 
 app.whenReady().then(createWindow);
+
+app.on('will-quit', async () => {
+  if (appModule) await appModule.exit();
+});

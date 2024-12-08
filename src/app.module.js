@@ -53,6 +53,12 @@ class AppModule {
       }
     });
   }
+
+  async exit() {
+    if (this._lolClientSocket) await this._lolClientSocket.closeLolClientSocket();
+
+    if (this._appServerSocket) await this._appServerSocket.closeAppServerSocket();
+  }
 }
 
 module.exports = AppModule;

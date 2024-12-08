@@ -57,6 +57,8 @@ class AppServerSocketService {
       appServerSocket.on('disconnect', () => {
         this._appServerSocket = null;
 
+        if (this._webContents.isDestroyed()) return;
+
         this._webContents.send('log', { message: '🟥 서버 연결 종료' });
       });
     } catch (error) {
@@ -77,7 +79,7 @@ class AppServerSocketService {
       const { message } = body;
 
       this._webContents.send('log', {
-        message: `🟩 ${message} (화면에 발급된 QR코드를 찍어주세요.)`,
+        message: `🟩 ${message} (스마트폰으로 접속해주세요.)`,
       });
     });
   }
@@ -91,6 +93,8 @@ class AppServerSocketService {
       this._appServerSocket.disconnect();
 
       this._appServerSocket = null;
+
+      if (this._webContents.isDestroyed()) return;
 
       this._webContents.send('log', { message: '🟥 서버 연결 종료' });
     } catch (error) {
