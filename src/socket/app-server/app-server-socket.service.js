@@ -5,12 +5,16 @@ class AppServerSocketService {
   _config;
   _puuid;
   _appServerSocket;
+  _lolClientSocket;
+  _webClientStatus;
 
-  constructor(webContents, config, puuid) {
+  constructor(webContents, config, puuid, lolClientSocket) {
     this._webContents = webContents;
     this._config = config;
     this._puuid = puuid;
     this._appServerSocket = null;
+    this._lolClientSocket = lolClientSocket;
+    this._webClientStatus = true;
   }
 
   async openAppServerSocket() {
@@ -54,14 +58,18 @@ class AppServerSocketService {
         await this.joinAppServerRoom(this._puuid);
       });
 
-      appServerSocket.on('hello', (body) => {
+      appServerSocket.on('hello', async (body) => {
         const { message } = body;
+
+        if (this._webClientStatus) await this.catchGameStatus();
 
         this._webContents.send('log', { message: `🟩 ${message}` });
       });
 
       appServerSocket.on('web-not-found', (body) => {
         const { message } = body;
+
+        this._webClientStatus = false;
 
         this._webContents.send('log', { message: `🟨 ${message}` });
       });
@@ -94,6 +102,23 @@ class AppServerSocketService {
         message: `🟩 ${message} (스마트폰으로 접속해주세요.)`,
       });
     });
+  }
+
+  async catchGameStatus() {
+    this._lolClientSocket.subscribe('/lol-gameflow/v1/gameflow-phase', async (gameStatus) => {
+      if (gameStatus === 'None' || 'Lobby') {
+        await this.sendGameStatus(gameStatus);
+
+        this._webContents.send('log', { message: `🟦 현재 게임 상태 - ${gameStatus}` });
+      }
+    });
+  }
+
+  async sendGameStatus(gameStatus) {
+    if (!this._appServerSocket)
+      this._webContents.send('log', { message: '⚠ 연결된 서버가 없습니다.', isError: true });
+
+    this._appServerSocket.emit('game-status', { gameStatus });
   }
 
   async closeAppServerSocket() {

@@ -35,7 +35,12 @@ class AppModule {
 
         const { puuid } = await riotApiService.fetchRiotAccount(gameName, tagLine);
 
-        this._appServerSocket = new AppServerSocketService(this._webContents, this._config, puuid);
+        this._appServerSocket = new AppServerSocketService(
+          this._webContents,
+          this._config,
+          puuid,
+          this._lolClientSocket._lolClientSocket,
+        );
 
         await this._appServerSocket.openAppServerSocket();
       } catch (error) {
