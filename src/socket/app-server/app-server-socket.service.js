@@ -54,6 +54,18 @@ class AppServerSocketService {
         await this.joinAppServerRoom(this._puuid);
       });
 
+      appServerSocket.on('hello', (body) => {
+        const { message } = body;
+
+        this._webContents.send('log', { message: `🟩 ${message}` });
+      });
+
+      appServerSocket.on('web-not-found', (body) => {
+        const { message } = body;
+
+        this._webContents.send('log', { message: `🟨 ${message}` });
+      });
+
       appServerSocket.on('disconnect', () => {
         this._appServerSocket = null;
 
