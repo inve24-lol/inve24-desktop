@@ -67,15 +67,15 @@ class AppServerSocketService {
     }
   }
 
-  async joinAppServerRoom() {
+  async joinAppServerRoom(puuid) {
     if (!this._appServerSocket)
       this._webContents.send('log', { message: '⚠ 연결된 서버가 없습니다.', isError: true });
 
-    this._appServerSocket.emit('join-room', { roomId: this._puuid });
+    this._appServerSocket.emit('join-room', { socketEntryCode: puuid });
 
-    this._appServerSocket.off('join-room-reply-app');
+    this._appServerSocket.off('join-room-reply');
 
-    this._appServerSocket.on('join-room-reply-app', (body) => {
+    this._appServerSocket.on('join-room-reply', (body) => {
       const { message } = body;
 
       this._webContents.send('log', {
