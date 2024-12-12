@@ -20,7 +20,26 @@ class ConfigService {
 
   getLcuApiConfig() {
     return {
-      lcuApi: { currentSummoner: this._get('LCU_API_CURRENT_SUMMONER') },
+      lcuApi: {
+        currentSummoner: this._get('LCU_API_CURRENT_SUMMONER'),
+      },
+    };
+  }
+
+  getLcuWebSocketConfig() {
+    return {
+      lcuWebSocket: {
+        gameflowPhase: this._get('LCU_WS_GAMEFLOW_PHASE'),
+      },
+    };
+  }
+
+  getLcuLiveConfig() {
+    return {
+      lcuLive: {
+        host: this._get('LCU_LIVE_HOST'),
+        activePlayerName: this._get('LCU_API_LIVE_ACTIVE_PLAYER_NAME'),
+      },
     };
   }
 

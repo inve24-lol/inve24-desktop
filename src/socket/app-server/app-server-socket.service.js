@@ -1,4 +1,5 @@
 const io = require('socket.io-client');
+const axios = require('axios');
 
 class AppServerSocketService {
   _webContents;
@@ -6,7 +7,6 @@ class AppServerSocketService {
   _puuid;
   _appServerSocket;
   _lolClientSocket;
-  _webClientStatus;
 
   constructor(webContents, config, puuid, lolClientSocket) {
     this._webContents = webContents;
@@ -14,7 +14,6 @@ class AppServerSocketService {
     this._puuid = puuid;
     this._appServerSocket = null;
     this._lolClientSocket = lolClientSocket;
-    this._webClientStatus = true;
   }
 
   async openAppServerSocket() {
@@ -61,7 +60,7 @@ class AppServerSocketService {
       appServerSocket.on('hello', async (body) => {
         const { message } = body;
 
-        if (this._webClientStatus) await this.catchGameStatus();
+        await this.catchGameStatus();
 
         this._webContents.send('log', { message: `🟩 ${message}` });
       });
@@ -69,7 +68,9 @@ class AppServerSocketService {
       appServerSocket.on('web-not-found', (body) => {
         const { message } = body;
 
-        this._webClientStatus = false;
+        const { lcuWebSocket } = this._config.getLcuWebSocketConfig();
+
+        this._lolClientSocket.unsubscribe(lcuWebSocket.gameflowPhase);
 
         this._webContents.send('log', { message: `🟨 ${message}` });
       });
@@ -105,11 +106,17 @@ class AppServerSocketService {
   }
 
   async catchGameStatus() {
-    this._lolClientSocket.subscribe('/lol-gameflow/v1/gameflow-phase', async (gameStatus) => {
-      if (gameStatus === 'None' || 'Lobby') {
+    const { lcuWebSocket } = this._config.getLcuWebSocketConfig();
+
+    this._lolClientSocket.subscribe(lcuWebSocket.gameflowPhase, async (gameStatus) => {
+      if (['None', 'Lobby', 'ChampSelect', 'GameStart'].includes(gameStatus)) {
         await this.sendGameStatus(gameStatus);
 
         this._webContents.send('log', { message: `🟦 현재 게임 상태 - ${gameStatus}` });
+      }
+
+      if (gameStatus === 'InProgress') {
+        await this.sendGameStartTime();
       }
     });
   }
@@ -119,6 +126,43 @@ class AppServerSocketService {
       this._webContents.send('log', { message: '⚠ 연결된 서버가 없습니다.', isError: true });
 
     this._appServerSocket.emit('game-status', { gameStatus });
+  }
+
+  async sendGameStartTime() {
+    if (!this._appServerSocket)
+      this._webContents.send('log', { message: '⚠ 연결된 서버가 없습니다.', isError: true });
+
+    let success = false;
+    let counter = 0;
+
+    while (counter < 90) {
+      const { lcuLive } = this._config.getLcuLiveConfig();
+
+      try {
+        const response = await axios.get(`${lcuLive.host}/${lcuLive.activePlayerName}`);
+
+        if (response) {
+          this._webContents.send('log', {
+            message: `🟪 ${response.data}님의 게임이 시작되었습니다.`,
+          });
+          success = true;
+
+          break;
+        }
+
+        counter++;
+      } catch (error) {
+        this._appServerSocket.emit('game-status', { gameStatus: 'Loading...' });
+        this._webContents.send('log', { message: '🟦 현재 게임 상태 - Loading...' });
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+
+    if (success) this._appServerSocket.emit('game-start-time', { gameStartTime: '3' });
+    else {
+      appendLog('🟨 3분이 경과되어 게임 조회를 종료합니다.');
+      await closeAppServerSocket();
+    }
   }
 
   async closeAppServerSocket() {
@@ -132,8 +176,6 @@ class AppServerSocketService {
       this._appServerSocket = null;
 
       if (this._webContents.isDestroyed()) return;
-
-      this._webContents.send('log', { message: '🟥 서버 연결 종료' });
     } catch (error) {
       console.log(error);
       throw error;
