@@ -26,6 +26,7 @@ class LolClientSocketService {
           if (this._webContents.isDestroyed()) return;
 
           this._webContents.send('log', { message: '🟥 롤 클라이언트를 찾을 수 없습니다.' });
+          this._webContents.send('end', { isEnd: true });
         }
       });
     } catch (error) {

@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const { invokeOpenLolClientSocket, invokeCloseLolClientSocket, onLog } = window.api;
+  const {
+    invokeOpenLolClientSocket,
+    invokeCloseLolClientSocket,
+    invokeCloseAppServerSocket,
+    onLog,
+    onEnd,
+  } = window.api;
   const startButton = document.getElementById('invokeOpenLolClientSocket');
   const reLoadButton = document.getElementById('invokeCloseLolClientSocket');
   const logArea = document.getElementById('onLog');
@@ -27,5 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
     else logArea.value += `[${time}] [LOG] - ${message}\n`;
 
     logArea.scrollTop = logArea.scrollHeight;
+  });
+
+  onEnd(async (_, { isEnd }) => {
+    if (isEnd) await invokeCloseAppServerSocket();
   });
 });

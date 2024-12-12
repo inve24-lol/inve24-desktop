@@ -57,6 +57,14 @@ class AppModule {
         this._webContents.send('log', { message: error.message, isError: true });
       }
     });
+
+    ipcMain.handle('close-app-server-socket', async () => {
+      try {
+        await this._appServerSocket.closeAppServerSocket();
+      } catch (error) {
+        this._webContents.send('log', { message: error.message, isError: true });
+      }
+    });
   }
 
   async exit() {
