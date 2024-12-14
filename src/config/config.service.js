@@ -38,7 +38,7 @@ class ConfigService {
     return {
       lcuLive: {
         host: this._get('LCU_LIVE_HOST'),
-        activePlayerName: this._get('LCU_API_LIVE_ACTIVE_PLAYER_NAME'),
+        activePlayerName: this._get('LCU_LIVE_ACTIVE_PLAYER_NAME'),
       },
     };
   }

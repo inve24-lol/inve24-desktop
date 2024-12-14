@@ -135,9 +135,9 @@ class AppServerSocketService {
     let success = false;
     let counter = 0;
 
-    while (counter < 90) {
-      const { lcuLive } = this._config.getLcuLiveConfig();
+    const { lcuLive } = this._config.getLcuLiveConfig();
 
+    while (counter < 90) {
       try {
         const response = await axios.get(`${lcuLive.host}/${lcuLive.activePlayerName}`);
 
